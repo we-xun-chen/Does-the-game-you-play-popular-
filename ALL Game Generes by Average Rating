@@ -1,0 +1,40 @@
+import pandas as pd
+import ast
+import matplotlib.pyplot as plt
+
+import os
+os.chdir('/content/drive/MyDrive/ENFIN')  # Colab 換路徑使用
+
+# 1. 讀取 Excel 檔案
+file_path = "Games-DATA1930-2023.xlsx"  # 請確認此路徑與檔案名稱正確
+df = pd.read_excel(file_path)
+
+# 2. 將 Genres 欄位轉為 list（從字串格式）
+df['Genres'] = df['Genres'].dropna().apply(ast.literal_eval)
+
+# 3. 將多分類展開為多列
+df_exploded = df.explode('Genres')
+
+# 4. 去除空白與缺失值
+df_exploded['Genres'] = df_exploded['Genres'].str.strip()
+df_exploded = df_exploded.dropna(subset=['Genres', 'Rating'])
+
+# 5. 確保 Rating 為數值型態
+df_exploded['Rating'] = pd.to_numeric(df_exploded['Rating'], errors='coerce')
+
+# 6. 分類計算平均評分
+genre_rating_avg = df_exploded.groupby('Genres')['Rating'].mean().sort_values(ascending=False)
+
+# 7. 顯示前10名結果
+print("🎮 遊戲分類平均評分（前10名）:")
+print(genre_rating_avg.head(23))
+
+# 8. 畫出長條圖
+plt.figure(figsize=(12, 6))
+genre_rating_avg.head(23).plot(kind='bar', color='skyblue')
+plt.title('ALL Game Generes by Average Rating')
+plt.xlabel('Genre')
+plt.ylabel('Average Rating')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
