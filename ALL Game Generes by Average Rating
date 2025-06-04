@@ -26,7 +26,7 @@ df_exploded['Rating'] = pd.to_numeric(df_exploded['Rating'], errors='coerce')
 genre_rating_avg = df_exploded.groupby('Genres')['Rating'].mean().sort_values(ascending=False)
 
 # 7. 顯示前10名結果
-print("🎮 遊戲分類平均評分（前10名）:")
+print("🎮 遊戲分類平均評分:")
 print(genre_rating_avg.head(23))
 
 # 8. 畫出長條圖
