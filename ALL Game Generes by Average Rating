@@ -6,7 +6,7 @@ import os
 os.chdir('/content/drive/MyDrive/ENFIN')  # Colab 換路徑使用
 
 # 1. 讀取 Excel 檔案
-file_path = "Games-DATA1930-2023.xlsx"  # 請確認此路徑與檔案名稱正確
+file_path = "ana.xlsx"  # 請確認此路徑與檔案名稱正確
 df = pd.read_excel(file_path)
 
 # 2. 將 Genres 欄位轉為 list（從字串格式）
