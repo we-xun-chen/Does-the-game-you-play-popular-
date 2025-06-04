@@ -1,0 +1,61 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import ast
+
+import os
+os.chdir('/content/drive/MyDrive/ENFIN')
+
+# 載入 Excel 檔案
+file_path = "ana.xlsx"  # 請確認此路徑與檔案名稱正確
+df = pd.read_excel(file_path, sheet_name='DATA')
+
+
+# 轉換 K 單位為數值（例如 "3.2K" -> 3200）
+def parse_k(value):
+    if isinstance(value, str):
+        value = value.strip().upper().replace(',', '')
+        if 'K' in value:
+            return float(value.replace('K', '')) * 1000
+        elif value.isnumeric():
+            return float(value)
+    elif isinstance(value, (int, float)):
+        return value
+    return np.nan
+
+# 應用轉換到 Plays 和 Wishlist 欄位
+df['Plays_num'] = df['Plays'].apply(parse_k)
+df['Wishlist_num'] = df['Wishlist'].apply(parse_k)
+
+# 清理缺失資料
+df_clean = df.dropna(subset=['Rating', 'Plays_num', 'Wishlist_num'])
+
+# Log 轉換處理偏態分布
+df_clean['log_Plays'] = np.log1p(df_clean['Plays_num'])
+df_clean['log_Wishlist'] = np.log1p(df_clean['Wishlist_num'])
+
+# ==============================
+# 繪圖 1：popularity_rating.png
+# ==============================
+
+sns.set(style='whitegrid', palette='muted')
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# Rating vs. Plays
+sns.regplot(x='log_Plays', y='Rating', data=df_clean, ax=axes[0],
+            scatter_kws={'alpha':0.6}, line_kws={'color': 'red'})
+axes[0].set_title("Rating vs. Number of Plays")
+axes[0].set_xlabel("Log(Plays + 1)")
+axes[0].set_ylabel("Rating")
+
+# Rating vs. Wishlist
+sns.regplot(x='log_Wishlist', y='Rating', data=df_clean, ax=axes[1],
+            scatter_kws={'alpha':0.6}, line_kws={'color': 'green'})
+axes[1].set_title("Rating vs. Wishlist Count")
+axes[1].set_xlabel("Log(Wishlist + 1)")
+axes[1].set_ylabel("Rating")
+
+plt.tight_layout()
+plt.savefig("popularity_rating.png", dpi=300)
+plt.show()
