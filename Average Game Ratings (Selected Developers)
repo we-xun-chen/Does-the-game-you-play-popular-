@@ -8,8 +8,8 @@ import os
 os.chdir('/content/drive/MyDrive/ENFIN')
 
 # 載入 Excel 檔案
-file_path = "da10.xlsx"  # 請確認此路徑與檔案名稱正確
-df = pd.read_excel(file_path)
+file_path = "ana.xlsx"  # 請確認此路徑與檔案名稱正確
+df = pd.read_excel(file_path, sheet_name='Developer')
 
 # 從 Team 欄位中提取第一位開發者
 def extract_primary_team(team_str):
