@@ -1,0 +1,56 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import ast
+
+import os
+os.chdir('/content/drive/MyDrive/ENFIN')
+
+# 載入 Excel 檔案
+file_path = "da10.xlsx"  # 請確認此路徑與檔案名稱正確
+df = pd.read_excel(file_path)
+
+# 從 Team 欄位中提取第一位開發者
+def extract_primary_team(team_str):
+    try:
+        team_list = ast.literal_eval(team_str)
+        if isinstance(team_list, list) and len(team_list) > 0:
+            return team_list[0].strip()
+    except:
+        return None
+    return None
+
+df_clean['Primary_Developer'] = df_clean['Team'].apply(extract_primary_team)
+
+# ⭐ 將 Square Enix 歸為 Square
+df_clean['Primary_Developer'] = df_clean['Primary_Developer'].replace({
+    'Square Enix': 'Square'
+})
+
+# 計算每個開發者的平均評分與遊戲數
+dev_stats = df_clean.groupby('Primary_Developer').agg(
+    game_count=('Rating', 'count'),
+    mean_rating=('Rating', 'mean')
+).reset_index()
+
+# 只篩選特定開發商
+target_developers = [
+    "Blizzard Entertainment", "Sega", "Ubisoft Entertainment", "The Pokémon Company",
+    "Ubisoft Montreal", "Electronic Arts", "Activision", "Intelligent Systems Co., Ltd.",
+    "Bandai Namco Entertainment", "Konami", "Nintendo", "Capcom", "Square",
+    "Naughty Dog", "Sony Interactive Entertainment", "FromSoftware", "TYPE-MOON", "ZA/UM"
+]
+
+dev_filtered = dev_stats[dev_stats['Primary_Developer'].isin(target_developers)]
+dev_sorted = dev_filtered.sort_values(by='mean_rating', ascending=False)
+
+# 繪製圖表
+plt.figure(figsize=(10, 6))
+sns.barplot(x='mean_rating', y='Primary_Developer', data=dev_sorted, palette='viridis')
+plt.xlabel("Average Rating")
+plt.ylabel("Developer")
+plt.title("Average Game Ratings (Selected Developers)")
+plt.tight_layout()
+plt.savefig("developer_ratings_filtered.png", dpi=300)
+plt.show()
